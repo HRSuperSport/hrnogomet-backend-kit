@@ -55,6 +55,7 @@ func MarshalStack(err error) interface{} {
 	out := make([]map[string]string, 0, len(ue.ErrRoot.Stack))
 	for _, frame := range ue.ErrRoot.Stack {
 		// stop processing for stack not from hrnogomet
+		// TODO: do we need this here?
 		parsedPath := strings.Split(frame.File, "hrnogomet-api")
 		if len(parsedPath) < 2 {
 			break
