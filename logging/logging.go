@@ -41,6 +41,7 @@ func ConfigureCommonFieldsInLogMessages() {
 	zerolog.MessageFieldName = "M"
 }
 
+// ConfigureDefaultLoggingSetup should be used in main file to configure common logging setup
 func ConfigureDefaultLoggingSetup() {
 	ConfigureShortFileNameInLogMessages()
 	ConfigureCommonFieldsInLogMessages()
