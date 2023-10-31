@@ -4,4 +4,4 @@
 
 Library holding common helper code shared by different backend applications.
 
-**IMPORTANT:** strictly no business logic here! This is public repo so that it is retrievable as any other open source library!
+**IMPORTANT:** strictly no business logic here (no sensitive values like AWS account numbers, ARNs, etc.)! This is public repo so that it is retrievable as any other open source library!
