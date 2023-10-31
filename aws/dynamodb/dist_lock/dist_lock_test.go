@@ -18,7 +18,8 @@ const (
 	dynamoDistLockTableName = "distTable"
 )
 
-func TestDistributedLockWithDynamoDbHappyPath(t *testing.T) {
+func TstDistributedLockWithDynamoDbHappyPath(t *testing.T) {
+	t.Helper()
 	logging.ConfigureDefaultLoggingSetup()
 	ctx := context.Background()
 	c := test.SetupLocalstack(ctx)
@@ -86,7 +87,8 @@ func TestDistributedLockWithDynamoDbHappyPath(t *testing.T) {
 	assert.Equal(t, 1, testWasHere)
 }
 
-func TestDistributedLockWithDynamoDbUnhappyPathTimeout(t *testing.T) {
+func TstDistributedLockWithDynamoDbUnhappyPathTimeout(t *testing.T) {
+	t.Helper()
 	logging.ConfigureDefaultLoggingSetup()
 	ctx := context.Background()
 	c := test.SetupLocalstack(ctx)
