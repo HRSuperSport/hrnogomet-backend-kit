@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/hrsupersport/hrnogomet-backend-kit/constants"
 )
 
@@ -64,5 +65,13 @@ func CreateDynamodbClient(ctx context.Context, awsRegion string) (*dynamodb.Clie
 		return nil, err
 	} else {
 		return dynamodb.NewFromConfig(*awsConfig), nil
+	}
+}
+
+func CreateSqsClient(ctx context.Context, awsRegion string) (*sqs.Client, error) {
+	if awsConfig, err := newAwsConfig(ctx, awsRegion, getCustomAwsEndpoint(ctx)); err != nil {
+		return nil, err
+	} else {
+		return sqs.NewFromConfig(*awsConfig), nil
 	}
 }
