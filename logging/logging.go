@@ -42,30 +42,32 @@ func ConfigureCommonFieldsInLogMessages() {
 }
 
 // ConfigureDefaultLoggingSetup should be used in main file to configure common logging setup
-func ConfigureDefaultLoggingSetup() {
+func ConfigureDefaultLoggingSetup(stackPathSplitter string) {
 	ConfigureShortFileNameInLogMessages()
 	ConfigureCommonFieldsInLogMessages()
 	// ConfigureLoggingMetrics()
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	zerolog.ErrorStackMarshaler = MarshalStack
+	zerolog.ErrorStackMarshaler = MarshalStackFnCreator(stackPathSplitter)
 	log.Logger = log.Output(os.Stdout)
 }
 
-func MarshalStack(err error) interface{} {
-	ue := eris.Unpack(err)
-	out := make([]map[string]string, 0, len(ue.ErrRoot.Stack))
-	for _, frame := range ue.ErrRoot.Stack {
-		// stop processing for stack not from hrnogomet
-		// TODO: do we need this here?
-		parsedPath := strings.Split(frame.File, "hrnogomet-api")
-		if len(parsedPath) < 2 {
-			break
+func MarshalStackFnCreator(stackPathSplitter string) func(error) interface{} {
+	return func(err error) interface{} {
+		ue := eris.Unpack(err)
+		out := make([]map[string]string, 0, len(ue.ErrRoot.Stack))
+		for _, frame := range ue.ErrRoot.Stack {
+			// split the path so that it begins with project folder only, e.g. internal/...
+			// instead of including absolute path like /Users/xx/project/yy/internal/...
+			parsedPath := strings.Split(frame.File, stackPathSplitter)
+			if len(parsedPath) < 2 {
+				break
+			}
+			file := fmt.Sprintf("%s:%d", parsedPath[len(parsedPath)-1], frame.Line)
+			out = append(out, map[string]string{
+				"source": file,
+				"func":   frame.Name,
+			})
 		}
-		file := fmt.Sprintf("%s:%d", parsedPath[len(parsedPath)-1], frame.Line)
-		out = append(out, map[string]string{
-			"source": file,
-			"func":   frame.Name,
-		})
+		return out
 	}
-	return out
 }

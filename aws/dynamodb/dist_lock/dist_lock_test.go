@@ -20,7 +20,7 @@ const (
 
 func TstDistributedLockWithDynamoDbHappyPath(t *testing.T) {
 	t.Helper()
-	logging.ConfigureDefaultLoggingSetup()
+	logging.ConfigureDefaultLoggingSetup("")
 	ctx := context.Background()
 	c := test.SetupLocalstack(ctx)
 	ctx = aws.SetCustomAwsEndpoint(ctx, c.URI)
@@ -89,7 +89,7 @@ func TstDistributedLockWithDynamoDbHappyPath(t *testing.T) {
 
 func TstDistributedLockWithDynamoDbUnhappyPathTimeout(t *testing.T) {
 	t.Helper()
-	logging.ConfigureDefaultLoggingSetup()
+	logging.ConfigureDefaultLoggingSetup("")
 	ctx := context.Background()
 	c := test.SetupLocalstack(ctx)
 	ctx = aws.SetCustomAwsEndpoint(ctx, c.URI)

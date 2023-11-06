@@ -4,7 +4,9 @@ import (
 	errorHelper "errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/hrsupersport/hrnogomet-backend-kit/logging"
 	"github.com/rotisserie/eris"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -116,4 +118,25 @@ func TestTranslateToHttpErrorNormalError(t *testing.T) {
 
 	TranslateServiceErrorToAPIError(c, serviceError, includeErrorDetails)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestErrorStackLogging(t *testing.T) {
+	//gin.SetMode(gin.TestMode)
+	logging.ConfigureDefaultLoggingSetup("hrnogomet-backend-kit")
+
+	serviceError := NewServiceErrorNotFound(errorHelper.New("fromBackend404"), "custom404")
+
+	/* contains absolute paths
+	custom404
+		errors.TestErrorStackLogging:/Users/adambezecny/dev/hrnogomet-backend-kit/errors/rest_api_error_test.go:127
+		errors.NewServiceErrorNotFound:/Users/adambezecny/dev/hrnogomet-backend-kit/errors/service_error.go:142
+		errors.newServiceError:/Users/adambezecny/dev/hrnogomet-backend-kit/errors/service_error.go:133
+	fromBackend404
+	*/
+	fmt.Println(eris.ToString(serviceError, true))
+
+	/* contains relative paths thanks to setting stackPathSplitter in logging.ConfigureDefaultLoggingSetup call!
+	{"L":"error","stack":[{"func":"errors.newServiceError","source":"/errors/service_error.go:133"},{"func":"errors.NewServiceErrorNotFound","source":"/errors/service_error.go:142"},{"func":"errors.TestErrorStackLogging","source":"/errors/rest_api_error_test.go:127"}],"error":"custom404: fromBackend404","T":"2023-11-06T09:35:45.36983+01:00","caller":"rest_api_error_test.go:129"}
+	*/
+	log.Error().Stack().Err(serviceError).Msg("")
 }
