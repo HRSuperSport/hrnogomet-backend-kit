@@ -55,7 +55,7 @@ func SetupMariaDB(ctx context.Context, dbUser string, dbPwd string, dbRootPwd st
 					return exitCode == 0
 				}),
 			wait.ForListeningPort(MariaDBPort),
-		).WithDeadline(1 * time.Minute),
+		).WithDeadline(6 * time.Minute),
 	}
 
 	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
