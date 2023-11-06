@@ -68,6 +68,7 @@ func CreateDynamodbClient(ctx context.Context, awsRegion string) (*dynamodb.Clie
 	}
 }
 
+// CreateSqsClient creates new AWS SQS client
 func CreateSqsClient(ctx context.Context, awsRegion string) (*sqs.Client, error) {
 	if awsConfig, err := newAwsConfig(ctx, awsRegion, getCustomAwsEndpoint(ctx)); err != nil {
 		return nil, err
