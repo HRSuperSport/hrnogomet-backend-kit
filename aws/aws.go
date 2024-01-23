@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/hrsupersport/hrnogomet-backend-kit/constants"
@@ -74,5 +75,14 @@ func CreateSqsClient(ctx context.Context, awsRegion string) (*sqs.Client, error)
 		return nil, err
 	} else {
 		return sqs.NewFromConfig(*awsConfig), nil
+	}
+}
+
+// CreateCloudWatchClient creates new AWS CW client
+func CreateCloudWatchClient(ctx context.Context, awsRegion string) (*cloudwatch.Client, error) {
+	if awsConfig, err := newAwsConfig(ctx, awsRegion, getCustomAwsEndpoint(ctx)); err != nil {
+		return nil, err
+	} else {
+		return cloudwatch.NewFromConfig(*awsConfig), nil
 	}
 }
