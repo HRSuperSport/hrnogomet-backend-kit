@@ -6,13 +6,14 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/rs/zerolog/log"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"time"
 )
 
 const (
@@ -40,7 +41,7 @@ func SetupPostgresDB(ctx context.Context, dbUser string, dbPwd string, dbName st
 			"POSTGRES_DB":       dbName,
 		},
 		WaitingFor: wait.ForAll(
-			wait.ForLog("database system is ready to accept connections").WithStartupTimeout(5*time.Second),
+			wait.ForLog("database system is ready to accept connections").WithStartupTimeout(30*time.Second),
 			wait.ForListeningPort(DBPort),
 		).WithDeadline(1 * time.Minute),
 	}
@@ -78,6 +79,10 @@ func SetupPostgresDB(ctx context.Context, dbUser string, dbPwd string, dbName st
 		log.Fatal().Err(err).Msg("cannot ping database")
 	}
 
+	if err := waitForDBReady(db, 30*time.Second, 500*time.Millisecond); err != nil {
+		log.Fatal().Err(err).Msg("cannot ping database")
+	}
+
 	return &PostgresDBContainer{
 		Container:           container,
 		Context:             ctx,
@@ -85,6 +90,24 @@ func SetupPostgresDB(ctx context.Context, dbUser string, dbPwd string, dbName st
 		URI:                 uri,
 		URIDockerCompatible: uriDockerCompatible,
 		DbName:              dbName,
+	}
+}
+
+func waitForDBReady(db *sql.DB, maxWait time.Duration, interval time.Duration) error {
+	deadline := time.Now().Add(maxWait)
+	var lastErr error
+
+	for {
+		if err := db.Ping(); err == nil {
+			return nil
+		} else {
+			lastErr = err
+		}
+		if time.Now().After(deadline) {
+			return fmt.Errorf("database did not become ready within %v: last error: %w", maxWait, lastErr)
+		}
+		log.Info().Msg("waiting for database to accept connections...")
+		time.Sleep(interval)
 	}
 }
 
